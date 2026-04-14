@@ -1,0 +1,24 @@
+{
+  "name": "bulletin-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for persistent AI memory via Google Docs",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/src/index.js",
+    "init": "node dist/scripts/init.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["mcp", "google-docs", "ai-memory"],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "googleapis": "^144.0.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
