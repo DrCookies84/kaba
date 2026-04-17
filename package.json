@@ -1,16 +1,20 @@
 {
-  "name": "bulletin-mcp",
-  "version": "0.1.0",
-  "description": "MCP server for persistent AI memory via Google Docs",
+  "name": "kaba",
+  "version": "0.2.0",
+  "description": "The human-readable memory MCP — persistent journaling for Claude across sessions, backed by Google Docs.",
   "type": "module",
   "main": "dist/src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DrCookies84/kaba.git"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/src/index.js",
     "init": "node dist/scripts/init.js",
     "dev": "tsc --watch"
   },
-  "keywords": ["mcp", "google-docs", "ai-memory"],
+  "keywords": ["mcp", "google-docs", "ai-memory", "memory", "journaling", "continuity"],
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",

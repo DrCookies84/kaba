@@ -1,4 +1,4 @@
-# Contributing to Bulletin
+# Contributing to KaBa
 
 PRs welcome. Open an issue first for major changes.
 
@@ -14,7 +14,7 @@ npm run dev    # watch mode
 
 ## Guidelines
 
-- Keep it simple. Bulletin is intentionally minimal.
+- Keep it simple. KaBa is intentionally minimal.
 - Google Docs is the storage layer. No databases.
 - The AI can only append. The user can edit anything.
 - Test against a real Google account before submitting.

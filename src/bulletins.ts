@@ -106,14 +106,14 @@ export async function createBulletin(
   const existing = await listBulletins(false);
   if (existing.length >= MAX_ACTIVE_BULLETINS) {
     throw new Error(
-      `Maximum ${MAX_ACTIVE_BULLETINS} active bulletins reached. Archive one before creating a new one.`
+      `Maximum ${MAX_ACTIVE_BULLETINS} active KaBas reached. Archive one before creating a new one.`
     );
   }
 
   // Check for duplicate thread_id
   const allBulletins = await listBulletins(true);
   if (allBulletins.some((b) => b.thread_id === threadId)) {
-    throw new Error(`A bulletin with thread_id "${threadId}" already exists.`);
+    throw new Error(`A KaBa with thread_id "${threadId}" already exists.`);
   }
 
   const folderId = await getOrCreateFolder(drive);
@@ -252,7 +252,7 @@ export async function archiveBulletin(
 
   const result = await findDocByThreadId(threadId);
   if (!result) {
-    throw new Error(`No bulletin found with thread_id "${threadId}".`);
+    throw new Error(`No KaBa found with thread_id "${threadId}".`);
   }
 
   const { docId, doc } = result;
@@ -261,7 +261,7 @@ export async function archiveBulletin(
   // Find and replace "archived: false" with "archived: true" in frontmatter
   const archivedMatch = text.match(/archived: false/);
   if (!archivedMatch) {
-    throw new Error("Bulletin is already archived or frontmatter is malformed.");
+    throw new Error("KaBa is already archived or frontmatter is malformed.");
   }
 
   // Find the position in the document

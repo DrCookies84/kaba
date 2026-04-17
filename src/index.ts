@@ -9,8 +9,8 @@ import { readBulletin, appendBulletin } from "./entries.js";
 dotenv.config();
 
 const server = new McpServer({
-  name: "bulletin",
-  version: "0.1.0",
+  name: "kaba",
+  version: "0.2.0",
 });
 
 // Tool 1: create_bulletin
@@ -143,7 +143,7 @@ server.tool(
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Bulletin MCP server running on stdio");
+  console.error("KaBa MCP server running on stdio");
 }
 
 main().catch((err) => {

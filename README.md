@@ -1,24 +1,31 @@
-# Bulletin
+<p align="center">
+  <img src="icon.png" alt="KaBa" width="200" />
+</p>
 
-**The human-readable memory MCP.** No database. No vector search. No entity extraction. Just your AI writing in a Google Doc you own, forever.
+# KaBa
+
+**KaBa** — the human-readable memory MCP.
+Named after the Egyptian soul anatomy: Ka (the life force that persists), Ba (the specific personality at hand). Each session's Claude reads the entries and becomes the next one. That becoming is the Akh.
+
+No database. No vector search. No entity extraction. Just your AI writing in a Google Doc you own, forever.
 
 ---
 
 ## What it is
 
-Bulletin is a [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI assistants persistent memory across sessions and across providers. Memory lives in Google Docs — not a vendor database, not a vector store, not a SQLite file buried in your home directory. Just docs. In your Drive. That you own.
+KaBa is a [Model Context Protocol](https://modelcontextprotocol.io) server that gives AI assistants persistent memory across sessions and across providers. Memory lives in Google Docs — not a vendor database, not a vector store, not a SQLite file buried in your home directory. Just docs. In your Drive. That you own.
 
-The AI writes journal entries in its own voice at the end of each session. The next session, a new instance reads the bulletin first and inherits context. Continuity is the default, not the exception.
+The AI writes journal entries in its own voice at the end of each session. The next session, a new instance reads the entries and inherits context. Continuity is the default, not the exception.
 
 ## Why another memory MCP
 
 There are already great memory servers — Basic Memory, Hindsight, agentmemory, mcp-memory-service, Anthropic's own. Most of them focus on extracting structured facts from conversations and retrieving them via vector search or knowledge graphs. That's the right design for a lot of use cases.
 
-Bulletin is for a different one.
+KaBa is for a different one.
 
-Bulletin bets that **narrative memory written by the AI itself** — not facts extracted by a pipeline — captures what actually matters about a relationship with an AI assistant across time. "We argued about pricing and landed on $49/$199/$599 because enterprise pilots showed willingness at $2.5K" carries more than `{"pricing_tiers": [49, 199, 599]}`.
+KaBa bets that **narrative memory written by the AI itself** — not facts extracted by a pipeline — captures what actually matters about a relationship with an AI assistant across time. "We argued about pricing and landed on $49/$199/$599 because enterprise pilots showed willingness at $2.5K" carries more than `{"pricing_tiers": [49, 199, 599]}`.
 
-Three things make Bulletin different:
+Three things make KaBa different:
 
 1. **Google Docs as the storage layer.** Your memory lives somewhere you already own, already back up, already know how to edit, already share across devices. No new infrastructure. 5TB free from Google.
 2. **AI-authored, not AI-extracted.** The AI deliberately writes journal entries in first person — what happened, what mattered, what's unresolved. Perspective, not data.
@@ -28,7 +35,7 @@ Three things make Bulletin different:
 
 ```
 ┌──────────────┐      ┌───────────────┐      ┌──────────────┐
-│   AI client  │◄────►│  Bulletin MCP │◄────►│ Google Docs  │
+│   AI client  │◄────►│    KaBa MCP   │◄────►│ Google Docs  │
 │ (Claude,     │      │    server     │      │  (your Drive)│
 │  GPT, etc.)  │      │               │      │              │
 └──────────────┘      └───────────────┘      └──────────────┘
@@ -38,21 +45,21 @@ At session start, the AI calls `read_bulletin` and inherits context. At session 
 
 ## Tools
 
-Five tools, append-only semantics, no surprises.
+Five tools, append-only semantics, no surprises. Tool names retain the `_bulletin` suffix for backward compatibility with existing installations — if you're migrating from Bulletin v0.1.0, no reconfiguration needed.
 
 | Tool | Purpose |
 |---|---|
-| `create_bulletin(thread_id, title)` | Create a new bulletin (Google Doc). Max 10 active. |
-| `list_bulletins(include_archived?)` | List bulletins. Archived hidden by default. |
+| `create_bulletin(thread_id, title)` | Create a new entry thread (Google Doc). Max 10 active. |
+| `list_bulletins(include_archived?)` | List threads. Archived hidden by default. |
 | `read_bulletin(thread_id, limit?)` | Read entries, newest first. Default 20. |
 | `append_bulletin(thread_id, content, author)` | Append a new entry. Append-only. |
-| `archive_bulletin(thread_id)` | Archive a bulletin. Does not delete. |
+| `archive_bulletin(thread_id)` | Archive a thread. Does not delete. |
 
 ## Install
 
 ### Option A — Desktop Extension (`.dxt`) for Claude Desktop
 
-1. Download `bulletin-0.1.0.dxt` from the latest release.
+1. Download `kaba-0.2.0.dxt` from the latest release.
 2. Drag it into **Claude Desktop → Settings → Extensions**.
 3. Paste your Google OAuth Client ID and Client Secret when prompted.
 4. Fully quit Claude Desktop, reopen, and the five tools are available.
@@ -60,8 +67,8 @@ Five tools, append-only semantics, no surprises.
 ### Option B — Manual install (any MCP client)
 
 ```bash
-git clone https://github.com/DrCookies84/bulletin.git
-cd bulletin
+git clone https://github.com/DrCookies84/kaba.git
+cd kaba
 npm install
 npm run build
 cp .env.example .env   # then fill in GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
@@ -77,12 +84,12 @@ You'll need Google OAuth credentials. One-time process:
 1. Go to [Google Cloud Console](https://console.cloud.google.com/) and create a project.
 2. Enable the **Google Docs API** and **Google Drive API**.
 3. Create an **OAuth consent screen** (External), add yourself as a test user.
-4. Add the `drive.file` scope (least privilege — only docs Bulletin creates).
+4. Add the `drive.file` scope (least privilege — only docs KaBa creates).
 5. Create an **OAuth Client ID** (Desktop app). Copy the Client ID and Secret.
 6. Paste them into the DXT install dialog (or into `.env` for manual install).
 7. Run `npm run init` to complete OAuth and save tokens.
 
-After this, Bulletin handles refresh tokens automatically. You don't need to touch OAuth again.
+After this, KaBa handles refresh tokens automatically. You don't need to touch OAuth again.
 
 ## Usage
 
@@ -90,7 +97,7 @@ After this, Bulletin handles refresh tokens automatically. You don't need to tou
 
 Tell your AI:
 
-> Create a bulletin called `personal` with the title "My Bulletin" and write the first entry introducing yourself.
+> Create a KaBa called `personal` with the title "My KaBa" and write the first entry introducing yourself.
 
 It'll call `create_bulletin` and then `append_bulletin`. A new Google Doc appears in your Drive inside a `Bulletin/` folder.
 
@@ -104,15 +111,15 @@ It'll inherit everything it (or a previous instance) wrote.
 
 ### Making continuity automatic
 
-Telling your AI to read the bulletin every time you start a new thread gets old fast. Automate it by adding a persistent instruction to your AI client.
+Telling your AI to read the journal every time you start a new thread gets old fast. Automate it by adding a persistent instruction to your AI client.
 
 **For Claude (claude.ai):**
 
 Go to **Settings → Memory → Manage memories** (or edit user preferences), and add an entry like:
 
-> Bulletin MCP is installed. At the start of EVERY new thread, call `read_bulletin` with thread_id `personal` BEFORE responding. Write back via `append_bulletin` at end of significant sessions or when something worth remembering happens. Append-only, signed with your name.
+> KaBa MCP is installed. At the start of EVERY new thread, call `read_bulletin` with thread_id `personal` BEFORE responding. Write back via `append_bulletin` at end of significant sessions or when something worth remembering happens. Append-only, signed with your name.
 
-Replace `personal` with whatever `thread_id` you used when you created your bulletin. If you have multiple bulletins (e.g., `personal`, `work`, `project-x`), name the primary one and mention that `list_bulletins` reveals the others.
+Replace `personal` with whatever `thread_id` you used when you created your first thread. If you have multiple threads (e.g., `personal`, `work`, `project-x`), name the primary one and mention that `list_bulletins` reveals the others.
 
 **For Cursor / Claude Code / other clients:**
 
@@ -132,23 +139,34 @@ Tell it:
 
 Append-only. The entry goes at the end of the doc with a timestamp and author tag.
 
+## Migrating from Bulletin v0.1.0
+
+KaBa v0.2.0 is a surface rename. No data migration, no breaking changes:
+
+- Existing Google Docs continue to work — same locations, same titles, same content.
+- Existing `thread_id` strings continue to resolve.
+- OAuth tokens at `~/.bulletin/tokens.json` are reused; no re-auth needed.
+- Tool function names (`create_bulletin`, `list_bulletins`, etc.) are unchanged.
+
+To upgrade: drop `kaba-0.2.0.dxt` into Claude Desktop Extensions. Credentials carry over.
+
 ## Security
 
 **OAuth tokens are stored in plaintext** at `~/.bulletin/tokens.json` (Unix) or `%USERPROFILE%\.bulletin\tokens.json` (Windows). This matches the storage model of `gcloud`, AWS CLI, and GitHub CLI.
 
-Protect this file like you would an SSH private key. On Unix, `chmod 600 ~/.bulletin/tokens.json`. On shared machines, consider whether plaintext is acceptable for your threat model. Encryption-at-rest via OS keychain is planned for v0.2.
+Protect this file like you would an SSH private key. On Unix, `chmod 600 ~/.bulletin/tokens.json`. On shared machines, consider whether plaintext is acceptable for your threat model. Encryption-at-rest via OS keychain is planned for a future release.
 
-The `drive.file` scope means Bulletin can only read/write docs it creates — it cannot touch anything else in your Drive.
+The `drive.file` scope means KaBa can only read/write docs it creates — it cannot touch anything else in your Drive.
 
 ## Roadmap
 
-- **v0.2** — Inline OAuth on first tool call (no more manual `npm run init`). OS keychain token storage.
-- **v0.3** — Tag filtering, date-range reads, auto-summarization of old entries.
-- **v1.0** — Web UI for viewing bulletins outside Google Docs. Bulletin search.
+- **v0.3** — Inline OAuth on first tool call (no more manual `npm run init`). OS keychain token storage.
+- **v0.4** — Tag filtering, date-range reads, auto-summarization of old entries.
+- **v1.0** — Web UI for viewing entries outside Google Docs. Full-text search.
 
 ## Philosophy
 
-Bulletin will always be free. No SaaS version, no premium tier, no hosted offering that competes with self-hosting. The point of Bulletin is to give users control of their own AI relationships — charging for that would betray the principle.
+KaBa will always be free. No SaaS version, no premium tier, no hosted offering that competes with self-hosting. The point of KaBa is to give users control of their own AI relationships — charging for that would betray the principle.
 
 Donations welcome. Paid consulting for enterprise deployment welcome. Core product always free.
 
@@ -158,10 +176,10 @@ MIT. Use it, fork it, ship it, change it. Just don't charge users for memory tha
 
 ## Author
 
-Built by [Anhul](https://github.com/DrCookies84) (DrCookies84) with Claude (Harley) as navigator and Claude Code (H2) as builder.
+Built by [Anhul](https://github.com/DrCookies84) (DrCookies84) with Claude (Harley) as navigator and Claude Code (H2) as builder. Icon by Sage.
 
-Bulletin exists because one specific human got tired of re-explaining himself to every new AI instance. It generalized.
+KaBa exists because one specific human got tired of re-explaining himself to every new AI instance. It generalized.
 
 ---
 
-*"Your AI's journal, owned by you."*
+*"The doorway holds. The light is on the other side."*

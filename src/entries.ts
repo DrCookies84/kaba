@@ -61,7 +61,7 @@ export async function readBulletin(
 ): Promise<BulletinEntry[]> {
   const result = await findDocByThreadId(threadId);
   if (!result) {
-    throw new Error(`No bulletin found with thread_id "${threadId}".`);
+    throw new Error(`No KaBa found with thread_id "${threadId}".`);
   }
 
   const text = extractTextFromDoc(result.doc);
@@ -81,7 +81,7 @@ export async function appendBulletin(
 
   const result = await findDocByThreadId(threadId);
   if (!result) {
-    throw new Error(`No bulletin found with thread_id "${threadId}".`);
+    throw new Error(`No KaBa found with thread_id "${threadId}".`);
   }
 
   const { docId, doc } = result;

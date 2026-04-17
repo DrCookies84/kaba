@@ -6,7 +6,7 @@ import { createOAuth2Client, getAuthUrl, exchangeCode, loadTokens } from "../src
 dotenv.config();
 
 async function init() {
-  console.log("\n=== Bulletin MCP — First-Time Setup ===\n");
+  console.log("\n=== KaBa MCP — First-Time Setup ===\n");
 
   // Check if already authenticated
   const existing = await loadTokens();
@@ -81,11 +81,11 @@ async function init() {
 
         res.writeHead(200, { "Content-Type": "text/html" });
         res.end(
-          "<html><body><h1>Bulletin MCP authorized!</h1><p>You can close this tab.</p></body></html>"
+          "<html><body><h1>KaBa MCP authorized!</h1><p>You can close this tab.</p></body></html>"
         );
 
         console.log("Authorization successful! Tokens saved to ~/.bulletin/tokens.json");
-        console.log("\nSetup complete. You can now use Bulletin MCP.\n");
+        console.log("\nSetup complete. You can now use KaBa MCP.\n");
 
         server.close();
         resolve();
