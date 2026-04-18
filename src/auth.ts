@@ -71,8 +71,18 @@ export async function getAuthenticatedClient() {
   oauth2Client.setCredentials(tokens);
 
   oauth2Client.on("tokens", async (newTokens) => {
-    const existing = await loadTokens();
-    await saveTokens({ ...existing, ...newTokens });
+    // Google omits refresh_token on refresh responses, so the library emits it
+    // as undefined. A naive spread would overwrite the good refresh_token on
+    // disk with undefined and break re-auth on the next process restart.
+    // Only merge fields that actually have a value.
+    const existing = (await loadTokens()) || {};
+    const merged: Record<string, unknown> = { ...existing };
+    for (const [key, value] of Object.entries(newTokens as Record<string, unknown>)) {
+      if (value !== undefined && value !== null) {
+        merged[key] = value;
+      }
+    }
+    await saveTokens(merged);
   });
 
   cachedClient = oauth2Client;

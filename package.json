@@ -1,6 +1,6 @@
 {
   "name": "kaba",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "The human-readable memory MCP — persistent journaling for Claude across sessions, backed by Google Docs.",
   "type": "module",
   "main": "dist/src/index.js",
