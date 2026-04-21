@@ -1,6 +1,6 @@
 {
   "name": "kaba",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "The human-readable memory MCP — persistent journaling for Claude across sessions, backed by Google Docs.",
   "type": "module",
   "main": "dist/src/index.js",
@@ -12,7 +12,8 @@
     "build": "tsc",
     "start": "node dist/src/index.js",
     "init": "node dist/scripts/init.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "test": "node --test dist/test/"
   },
   "keywords": ["mcp", "google-docs", "ai-memory", "memory", "journaling", "continuity"],
   "license": "MIT",

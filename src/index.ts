@@ -10,7 +10,7 @@ dotenv.config();
 
 const server = new McpServer({
   name: "kaba",
-  version: "0.2.2",
+  version: "0.2.3",
 });
 
 // Tool 1: create_bulletin

@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import { getAuthenticatedClient } from "./auth.js";
+import { withAuth } from "./auth.js";
 import {
   findDocByThreadId,
   extractTextFromDoc,
@@ -76,44 +76,44 @@ export async function appendBulletin(
   content: string,
   author: string
 ): Promise<AppendEntryResult> {
-  const auth = await getAuthenticatedClient();
-  const docs = google.docs({ version: "v1", auth });
+  return withAuth(async (auth) => {
+    const docs = google.docs({ version: "v1", auth });
 
-  const result = await findDocByThreadId(threadId);
-  if (!result) {
-    throw new Error(`No KaBa found with thread_id "${threadId}".`);
-  }
+    const result = await findDocByThreadId(threadId);
+    if (!result) {
+      throw new Error(`No KaBa found with thread_id "${threadId}".`);
+    }
 
-  const { docId, doc } = result;
+    const { docId, doc } = result;
 
-  // Find the end of the document
-  const body = doc.body;
-  if (!body?.content) {
-    throw new Error("Document has no content.");
-  }
+    const body = doc.body;
+    if (!body?.content) {
+      throw new Error("Document has no content.");
+    }
 
-  const lastElement = body.content[body.content.length - 1];
-  const endIndex = lastElement.endIndex! - 1; // Before the trailing newline
+    const lastElement = body.content[body.content.length - 1];
+    const endIndex = lastElement.endIndex! - 1;
 
-  const now = new Date();
-  const timestamp = formatTimestamp(now);
-  const entryId = crypto.randomUUID().slice(0, 8);
+    const now = new Date();
+    const timestamp = formatTimestamp(now);
+    const entryId = crypto.randomUUID().slice(0, 8);
 
-  const entryText = `\n---\n\n## [${timestamp}] — ${author}\n\n${content}\n`;
+    const entryText = `\n---\n\n## [${timestamp}] — ${author}\n\n${content}\n`;
 
-  await docs.documents.batchUpdate({
-    documentId: docId,
-    requestBody: {
-      requests: [
-        {
-          insertText: {
-            location: { index: endIndex },
-            text: entryText,
+    await docs.documents.batchUpdate({
+      documentId: docId,
+      requestBody: {
+        requests: [
+          {
+            insertText: {
+              location: { index: endIndex },
+              text: entryText,
+            },
           },
-        },
-      ],
-    },
-  });
+        ],
+      },
+    });
 
-  return { entry_id: entryId, timestamp };
+    return { entry_id: entryId, timestamp };
+  });
 }
