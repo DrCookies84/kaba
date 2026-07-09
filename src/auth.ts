@@ -174,6 +174,9 @@ export async function getAuthenticatedClient(): Promise<OAuth2Client> {
     token_path: TOKEN_PATH,
     node_version: process.version,
     platform: process.platform,
+    node_extra_ca_certs: process.env.NODE_EXTRA_CA_CERTS || "<unset>",
+    node_options: process.env.NODE_OPTIONS || "<unset>",
+    ssl_cert_file: process.env.SSL_CERT_FILE || "<unset>",
   });
 
   const { clientId } = getClientConfig();

@@ -1,16 +1,63 @@
+// TLS/transport workaround: rebuild the default HTTPS agent before any
+// OAuth/HTTPS calls. Two concerns handled here:
+//   1. TLS-intercepting security software (Avast/Nord) — load an extra CA
+//      bundle when launcher env passthrough is unavailable.
+//   2. keepAlive (2026-07-01): node >=24.17 flipped https.globalAgent's
+//      keepAlive default to true. node-fetch (gaxios's transport) then reuses a
+//      pooled TLS connection and drops the token-endpoint response mid-body ->
+//      "Invalid response body ... Premature close" on every OAuth refresh.
+//      Reproduced under v24.17 (fails) vs v22.19 (works); keepAlive:false fixes
+//      it under both. Forcing a fresh connection per request restores pre-24.17
+//      behavior. Replace the binding (node-fetch reads https.globalAgent at
+//      request time) rather than mutating .options, which the Agent ignores
+//      post-construction.
+import fsSync from "node:fs";
+import tls from "node:tls";
+import https from "node:https";
+import path from "node:path";
+import os from "node:os";
+(() => {
+  const opts: https.AgentOptions = { keepAlive: false };
+  const BUNDLE = path.join(os.homedir(), "windows-ca-bundle.pem");
+  if (fsSync.existsSync(BUNDLE)) {
+    const pem = fsSync.readFileSync(BUNDLE, "utf-8");
+    const certs =
+      pem.match(/-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/g) || [];
+    if (certs.length) opts.ca = [...tls.rootCertificates, ...certs];
+  }
+  https.globalAgent = new https.Agent(opts);
+})();
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import dotenv from "dotenv";
 
-import { createBulletin, listBulletins, archiveBulletin } from "./bulletins.js";
-import { readBulletin, appendBulletin } from "./entries.js";
+// Lazy-load (2026-07-09): bulletins.js/entries.js pull in googleapis —
+// ~1,800 files / most of the 166MB dep graph. Loading that at startup put
+// cold module load past Claude Desktop's fixed 60s initialize timeout
+// whenever the AV re-scans the graph (e.g. after an app update ships a new
+// built-in node.exe and resets its scan reputation). Import them on first
+// tool call instead: initialize answers in <2s regardless of disk state,
+// and the one-time load cost lands inside a tool call, which tolerates it.
+type Impl = typeof import("./bulletins.js") & typeof import("./entries.js");
+let _impl: Impl | null = null;
+async function impl(): Promise<Impl> {
+  if (!_impl) {
+    const [bulletins, entries] = await Promise.all([
+      import("./bulletins.js"),
+      import("./entries.js"),
+    ]);
+    _impl = { ...bulletins, ...entries };
+  }
+  return _impl;
+}
 
 dotenv.config();
 
 const server = new McpServer({
   name: "kaba",
-  version: "0.2.3",
+  version: "0.2.4",
 });
 
 // Tool 1: create_bulletin
@@ -23,7 +70,7 @@ server.tool(
   },
   async ({ thread_id, title }) => {
     try {
-      const result = await createBulletin(thread_id, title);
+      const result = await (await impl()).createBulletin(thread_id, title);
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };
@@ -50,7 +97,7 @@ server.tool(
   },
   async ({ include_archived }) => {
     try {
-      const result = await listBulletins(include_archived);
+      const result = await (await impl()).listBulletins(include_archived);
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };
@@ -78,7 +125,7 @@ server.tool(
   },
   async ({ thread_id, limit }) => {
     try {
-      const result = await readBulletin(thread_id, limit);
+      const result = await (await impl()).readBulletin(thread_id, limit);
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };
@@ -103,7 +150,7 @@ server.tool(
   },
   async ({ thread_id, content, author }) => {
     try {
-      const result = await appendBulletin(thread_id, content, author);
+      const result = await (await impl()).appendBulletin(thread_id, content, author);
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };
@@ -126,7 +173,7 @@ server.tool(
   },
   async ({ thread_id }) => {
     try {
-      const result = await archiveBulletin(thread_id);
+      const result = await (await impl()).archiveBulletin(thread_id);
       return {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };
